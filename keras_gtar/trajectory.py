@@ -31,8 +31,12 @@ class Trajectory:
         self.close()
 
     def __len__(self):
+        return len(self.frames)
+
+    @property
+    def frames(self):
         (_, frames) = self.traj.framesWithRecordsNamed('weight')
-        return len(frames)
+        return frames
 
     def close(self):
         self.traj.close()
