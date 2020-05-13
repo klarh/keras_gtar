@@ -33,27 +33,19 @@ class Trajectory:
     def __len__(self):
         return len(self.frames)
 
+    def close(self):
+        self.traj.close()
+
     @property
     def frames(self):
         (_, frames) = self.traj.framesWithRecordsNamed('weight')
         return frames
 
-    def close(self):
-        self.traj.close()
-
-    def load(self, frame=-1):
-        """Loads a model stored at the given frame index
+    def get_weights(self, frame=-1):
+        """Returns a list of weight arrays for a model stored at the given frame index
 
         :param frame: integer index of the step to load. Can be negative to count from the end.
         """
-        model_description = self.traj.readStr('keras/model.json')
-        assert model_description
-
-        extra_classes = self.traj.readBytes('keras/layer_classes.pkl')
-        extra_classes = pickle.loads(extra_classes) if extra_classes else {}
-
-        model = keras.models.model_from_json(model_description, extra_classes)
-
         (_, frames) = self.traj.framesWithRecordsNamed('weight')
         frame_index = frames[frame]
 
@@ -73,14 +65,31 @@ class Trajectory:
                 shape_records[layer][weight] = rec
 
         all_weights = []
-        for (i, layer) in enumerate(model.layers):
-            for weight_index in range(len(weight_records[i])):
-                weight_rec = weight_records[i][weight_index]
+        for (i, records) in sorted(weight_records.items()):
+            for weight_index in range(len(records)):
+                weight_rec = records[weight_index]
                 shape_rec = shape_records[i][weight_index]
                 shape = self.traj.getRecord(shape_rec, frame_index)
                 weight = self.traj.getRecord(weight_rec, frame_index)
                 weight = weight.reshape(shape)
                 all_weights.append(weight)
+
+        return all_weights
+
+    def load(self, frame=-1):
+        """Loads a model stored at the given frame index
+
+        :param frame: integer index of the step to load. Can be negative to count from the end.
+        """
+        model_description = self.traj.readStr('keras/model.json')
+        assert model_description
+
+        extra_classes = self.traj.readBytes('keras/layer_classes.pkl')
+        extra_classes = pickle.loads(extra_classes) if extra_classes else {}
+
+        model = keras.models.model_from_json(model_description, extra_classes)
+
+        all_weights = self.get_weights(frame)
 
         model.set_weights(all_weights)
         return model
