@@ -3,7 +3,7 @@ import pickle
 import re
 
 import gtar
-import keras
+from tensorflow import keras
 
 class Trajectory:
     """Interface to save and load models from a GTAR trajectory

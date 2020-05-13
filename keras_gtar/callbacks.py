@@ -1,5 +1,5 @@
 from . import Trajectory
-import keras
+from tensorflow import keras
 
 class GTARLogger(keras.callbacks.Callback):
     """Keras callback to log all weights of a model at a given frequency
