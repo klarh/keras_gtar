@@ -17,6 +17,7 @@ class GTARLogger(keras.callbacks.Callback):
         self.when = when
         self.append = append
         self.step_offset = step_offset
+        self.batches = 0
 
         assert when in ('pre_batch', 'post_batch', 'pre_epoch', 'post_epoch')
         super().__init__(*args, **kwargs)
@@ -39,10 +40,12 @@ class GTARLogger(keras.callbacks.Callback):
             self.trajectory.save_weights(self.model, str(index))
 
     def on_batch_begin(self, index, logs={}):
-        return self._save(index, 'pre_batch')
+        return self._save(self.batches, 'pre_batch')
 
     def on_batch_end(self, index, logs={}):
-        return self._save(index, 'post_batch')
+        result = self._save(self.batches, 'post_batch')
+        self.batches += 1
+        return result
 
     def on_epoch_begin(self, index, logs={}):
         return self._save(index, 'pre_epoch')
