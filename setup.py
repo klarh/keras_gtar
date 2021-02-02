@@ -16,7 +16,7 @@ setup(name='keras-gtar',
       ],
       description='Save and load keras models from GTAR trajectory files',
       extras_require={},
-      install_requires=['gtar', 'tensorflow >= 2'],
+      install_requires=['gtar'],
       license='MIT',
       packages=[
           'keras_gtar',
