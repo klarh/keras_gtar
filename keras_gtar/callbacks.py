@@ -9,14 +9,17 @@ class GTARLogger(keras.callbacks.Callback):
     :param when: String indicating when to save: one of `pre_batch`, `post_batch`, `pre_epoch`, or `post_epoch`
     :param append: If True, append to instead of overwriting the file if it exists already
     :param step_offset: Offset to apply to the epoch or batch index
+    :param group: GTAR group to use to organize multiple sub-trajectories within the same GTAR file, if given
+
     """
     def __init__(self, filename, period=1, when='post_epoch', append=True,
-                 step_offset=0, *args, **kwargs):
+                 step_offset=0, group=None, *args, **kwargs):
         self.filename = filename
         self.period = period
         self.when = when
         self.append = append
         self.step_offset = step_offset
+        self.group = group
         self.batches = 0
 
         assert when in ('pre_batch', 'post_batch', 'pre_epoch', 'post_epoch')
@@ -24,7 +27,7 @@ class GTARLogger(keras.callbacks.Callback):
 
     def on_train_begin(self, logs={}):
         mode = 'a' if self.append else 'w'
-        self.trajectory = Trajectory(self.filename, mode)
+        self.trajectory = Trajectory(self.filename, mode, self.group)
         self.trajectory.save_model(self.model)
 
     def on_train_end(self, logs={}):
