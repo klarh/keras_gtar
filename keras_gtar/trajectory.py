@@ -85,7 +85,8 @@ class Trajectory:
                 shape_rec = shape_records[i][weight_index]
                 shape = self.handle.getRecord(shape_rec, frame_index)
                 weight = self.handle.getRecord(weight_rec, frame_index)
-                weight = weight.reshape(shape)
+                if weight.size:
+                    weight = weight.reshape(shape)
                 all_weights.append(weight)
 
         return all_weights
